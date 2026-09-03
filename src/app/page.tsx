@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sparkles, ArrowRight, ShieldCheck, Leaf, DollarSign, PackageSearch } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldCheck, Leaf, PackageSearch, QrCode, Smartphone } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { CategoryBar } from '@/components/CategoryBar';
 import { ItemCard } from '@/components/ItemCard';
 import { ItemDetailModal } from '@/components/ItemDetailModal';
 import { CreateItemModal } from '@/components/CreateItemModal';
+import { QRCodeModal } from '@/components/QRCodeModal';
 import { useMarketplace } from '@/context/MarketplaceContext';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function Home() {
   const {
@@ -18,7 +20,9 @@ export default function Home() {
     selectedCategory,
     selectedExchangeType,
     savedOnly,
-    savedItemIds
+    savedItemIds,
+    qrModalOpen,
+    setQrModalOpen
   } = useMarketplace();
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -67,7 +71,7 @@ export default function Home() {
                 Connect with students across dorms & departments to buy, trade, or giveaway textbooks, lab gear, monitors, and furniture. Save up to 80% on college essentials.
               </p>
 
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
                 <button
                   onClick={() => setCreateModalOpen(true)}
                   className="px-6 py-3 rounded-full text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/25 active:scale-95 transition-all flex items-center gap-2"
@@ -76,7 +80,16 @@ export default function Home() {
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
-                <div className="flex items-center gap-4 text-xs font-medium text-gray-500 dark:text-zinc-400">
+                {/* Mobile scan button */}
+                <button
+                  onClick={() => setQrModalOpen(true)}
+                  className="px-5 py-3 rounded-full text-xs sm:text-sm font-bold text-gray-800 dark:text-zinc-200 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-700 shadow-xs transition-all flex items-center gap-2"
+                >
+                  <QrCode className="w-4 h-4 text-blue-600" />
+                  <span>Scan to Use on Mobile</span>
+                </button>
+
+                <div className="w-full flex items-center justify-center md:justify-start gap-4 text-xs font-medium text-gray-500 dark:text-zinc-400 pt-1">
                   <div className="flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 text-emerald-500" />
                     <span>Campus Verified</span>
@@ -86,29 +99,41 @@ export default function Home() {
                     <span>Zero Waste</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <DollarSign className="w-4 h-4 text-blue-500" />
+                    <span className="font-bold text-blue-500">₹</span>
                     <span>Zero Fees</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="w-full md:w-auto grid grid-cols-2 sm:grid-cols-2 gap-3 max-w-sm">
+            {/* Quick Stats Widget + Scannable QR Mini Card */}
+            <div className="w-full md:w-auto grid grid-cols-2 gap-3 max-w-sm">
               <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900/80 border border-gray-200/80 dark:border-zinc-800 shadow-xs">
-                <div className="text-2xl font-black text-gray-900 dark:text-white">$42,800+</div>
+                <div className="text-2xl font-black text-gray-900 dark:text-white">₹3,50,000+</div>
                 <div className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Saved by students</div>
               </div>
               <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900/80 border border-gray-200/80 dark:border-zinc-800 shadow-xs">
                 <div className="text-2xl font-black text-blue-600 dark:text-blue-400">1,240+</div>
-                <div className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Books & items reused</div>
+                <div className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Items reused</div>
               </div>
               <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900/80 border border-gray-200/80 dark:border-zinc-800 shadow-xs">
                 <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">100%</div>
                 <div className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">On-campus meetups</div>
               </div>
-              <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900/80 border border-gray-200/80 dark:border-zinc-800 shadow-xs">
-                <div className="text-2xl font-black text-violet-600 dark:text-violet-400">4.9 ★</div>
-                <div className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Peer trade rating</div>
+              {/* QR Mini Trigger Card */}
+              <div 
+                onClick={() => setQrModalOpen(true)}
+                className="p-3.5 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-zinc-900 dark:to-blue-950/40 border border-blue-200/60 dark:border-blue-900/50 shadow-xs cursor-pointer hover:border-blue-500 transition-colors flex items-center gap-2.5"
+              >
+                <div className="p-1 bg-white rounded-lg shadow-xs shrink-0">
+                  <QRCodeSVG value="https://campusexchange-six.vercel.app/" size={48} />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-blue-900 dark:text-blue-300 flex items-center gap-1">
+                    <Smartphone className="w-3 h-3" /> Scan Mobile
+                  </div>
+                  <div className="text-[10px] text-blue-700 dark:text-blue-400 mt-0.5">Tap to enlarge QR</div>
+                </div>
               </div>
             </div>
           </div>
@@ -149,6 +174,7 @@ export default function Home() {
         )}
       </main>
 
+      {/* Modals */}
       {activeItem && (
         <ItemDetailModal
           item={activeItem}
@@ -162,14 +188,28 @@ export default function Home() {
         />
       )}
 
+      {qrModalOpen && (
+        <QRCodeModal
+          onClose={() => setQrModalOpen(false)}
+        />
+      )}
+
       <footer className="border-t border-gray-200/80 dark:border-zinc-800 bg-white dark:bg-[#121316] py-8 mt-12 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-zinc-400">
           <div className="flex items-center gap-2">
             <span className="font-bold text-gray-900 dark:text-white">UniLoop Campus Exchange</span>
             <span>• Built for university sustainability and affordable education</span>
           </div>
-          <div>
-            Designed with Google Stitch UI Guidelines
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setQrModalOpen(true)}
+              className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:underline font-medium"
+            >
+              <QrCode className="w-3.5 h-3.5" />
+              <span>Get Mobile QR</span>
+            </button>
+            <span>•</span>
+            <span>Designed with Google Stitch UI</span>
           </div>
         </div>
       </footer>

@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { X, Sparkles, BookOpen, Laptop, Armchair, FlaskConical, MapPin } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Sparkles, BookOpen, Laptop, Armchair, FlaskConical, MapPin, Camera, Image as ImageIcon, Trash2, Plus, Link as LinkIcon } from 'lucide-react';
 import { CategoryType, ItemCondition, ExchangeType } from '../types';
 import { useMarketplace } from '../context/MarketplaceContext';
 
@@ -16,14 +16,21 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
   const [category, setCategory] = useState<CategoryType>('books');
   const [condition, setCondition] = useState<ItemCondition>('Like New');
   const [exchangeType, setExchangeType] = useState<ExchangeType>('Sell');
-  const [price, setPrice] = useState<number>(20);
+  const [price, setPrice] = useState<number>(500);
   const [description, setDescription] = useState('');
   const [campusLocation, setCampusLocation] = useState('Central Library Quad');
   const [department, setDepartment] = useState('');
   const [courseCode, setCourseCode] = useState('');
   const [interestedTradeFor, setInterestedTradeFor] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
   const [tagsInput, setTagsInput] = useState('');
+
+  // Image upload states: camera, gallery, or URL
+  const [images, setImages] = useState<string[]>([]);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [customUrl, setCustomUrl] = useState('');
+
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const quickImages: Record<CategoryType, string> = {
     books: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000',
@@ -32,11 +39,40 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
     lab: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=1000',
   };
 
+  // Handle file uploads (both camera and gallery)
+  const handleFiles = (fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
+
+    Array.from(fileList).forEach(file => {
+      if (images.length >= 4) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          setImages(prev => prev.length < 4 ? [...prev, e.target!.result as string] : prev);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleAddUrl = () => {
+    if (!customUrl.trim()) return;
+    if (images.length < 4) {
+      setImages(prev => [...prev, customUrl.trim()]);
+      setCustomUrl('');
+      setShowUrlInput(false);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
 
-    const finalImage = imageUrl.trim() || quickImages[category];
+    const finalImages = images.length > 0 ? images : [quickImages[category]];
     const tags = tagsInput
       .split(',')
       .map(t => t.trim())
@@ -53,7 +89,7 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
       department: department || undefined,
       courseCode: courseCode || undefined,
       interestedTradeFor: exchangeType === 'Trade' ? interestedTradeFor : undefined,
-      images: [finalImage],
+      images: finalImages,
       tags: tags.length > 0 ? tags : [category, condition]
     });
 
@@ -89,6 +125,8 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-5 flex-1">
+          
+          {/* Title */}
           <div>
             <label className="block text-xs font-bold text-gray-700 dark:text-zinc-300 uppercase tracking-wide mb-1.5">
               Item Title *
@@ -103,6 +141,125 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
             />
           </div>
 
+          {/* Photos Upload: Camera & Gallery */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-bold text-gray-700 dark:text-zinc-300 uppercase tracking-wide">
+                Product Pictures ({images.length}/4)
+              </label>
+              <span className="text-[11px] text-gray-400">Click photo or import from gallery</span>
+            </div>
+
+            {/* Hidden file inputs */}
+            {/* Camera input with capture="environment" for mobile camera trigger */}
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              ref={cameraInputRef}
+              className="hidden"
+              onChange={(e) => handleFiles(e.target.files)}
+            />
+            {/* Gallery input allowing multi-selection */}
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              ref={galleryInputRef}
+              className="hidden"
+              onChange={(e) => handleFiles(e.target.files)}
+            />
+
+            {/* Action buttons for Camera and Gallery */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mb-3">
+              <button
+                type="button"
+                onClick={() => cameraInputRef.current?.click()}
+                disabled={images.length >= 4}
+                className="flex items-center justify-center gap-2 p-3 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100/70 text-xs font-semibold disabled:opacity-50 transition-all"
+              >
+                <Camera className="w-4 h-4" />
+                <span>Take Photo</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => galleryInputRef.current?.click()}
+                disabled={images.length >= 4}
+                className="flex items-center justify-center gap-2 p-3 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/80 hover:bg-gray-100 text-gray-700 dark:text-zinc-200 text-xs font-semibold disabled:opacity-50 transition-all"
+              >
+                <ImageIcon className="w-4 h-4" />
+                <span>Gallery Import</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowUrlInput(!showUrlInput)}
+                className="col-span-2 sm:col-span-1 flex items-center justify-center gap-1.5 p-3 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/80 hover:bg-gray-100 text-gray-600 dark:text-zinc-400 text-xs font-medium transition-all"
+              >
+                <LinkIcon className="w-3.5 h-3.5" />
+                <span>Paste Link</span>
+              </button>
+            </div>
+
+            {/* Optional URL input toggle */}
+            {showUrlInput && (
+              <div className="flex gap-2 mb-3">
+                <input
+                  type="url"
+                  value={customUrl}
+                  onChange={(e) => setCustomUrl(e.target.value)}
+                  placeholder="https://images.unsplash.com/..."
+                  className="flex-1 px-3 py-1.5 text-xs bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg outline-none focus:border-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddUrl}
+                  className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700"
+                >
+                  Add
+                </button>
+              </div>
+            )}
+
+            {/* Image Preview Strip */}
+            {images.length > 0 ? (
+              <div className="flex gap-3 overflow-x-auto p-2 bg-gray-50 dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800">
+                {images.map((img, idx) => (
+                  <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-700 shrink-0 group">
+                    <img src={img} alt="preview" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(idx)}
+                      className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity"
+                      title="Remove image"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-400" />
+                    </button>
+                    <span className="absolute bottom-1 left-1 px-1 py-0.2 rounded bg-black/60 text-[9px] text-white">
+                      #{idx + 1}
+                    </span>
+                  </div>
+                ))}
+                {images.length < 4 && (
+                  <button
+                    type="button"
+                    onClick={() => galleryInputRef.current?.click()}
+                    className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 dark:border-zinc-700 flex flex-col items-center justify-center text-gray-400 hover:text-blue-500 hover:border-blue-500 transition-colors shrink-0"
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span className="text-[10px] mt-0.5">Add</span>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="p-3 text-center rounded-2xl bg-gray-50/60 dark:bg-zinc-900/60 border border-dashed border-gray-200 dark:border-zinc-800 text-xs text-gray-400">
+                No custom photos added yet. Tap <strong>Take Photo</strong> or <strong>Gallery</strong> to attach goods pictures.
+              </div>
+            )}
+          </div>
+
+          {/* Category Selector */}
           <div>
             <label className="block text-xs font-bold text-gray-700 dark:text-zinc-300 uppercase tracking-wide mb-1.5">
               Category
@@ -135,6 +292,7 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
             </div>
           </div>
 
+          {/* Exchange Type & Price (in ₹ INR) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-zinc-300 uppercase tracking-wide mb-1.5">
@@ -145,7 +303,7 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
                 onChange={(e) => setExchangeType(e.target.value as ExchangeType)}
                 className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700 rounded-xl focus:border-blue-500 outline-none"
               >
-                <option value="Sell">For Sale (Cash/Venmo)</option>
+                <option value="Sell">For Sale (₹ INR)</option>
                 <option value="Trade">Exchange / Trade</option>
                 <option value="Giveaway">Free Giveaway</option>
               </select>
@@ -154,15 +312,18 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
             {exchangeType === 'Sell' ? (
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-zinc-300 uppercase tracking-wide mb-1.5">
-                  Price ($ USD)
+                  Price (₹ INR)
                 </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={price}
-                  onChange={(e) => setPrice(Number(e.target.value))}
-                  className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700 rounded-xl focus:border-blue-500 outline-none"
-                />
+                <div className="relative">
+                  <span className="absolute left-3.5 top-2.5 text-sm font-bold text-gray-500">₹</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={price}
+                    onChange={(e) => setPrice(Number(e.target.value))}
+                    className="w-full pl-8 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700 rounded-xl focus:border-blue-500 outline-none"
+                  />
+                </div>
               </div>
             ) : exchangeType === 'Trade' ? (
               <div>
@@ -184,6 +345,7 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
             )}
           </div>
 
+          {/* Condition & Course Code */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-zinc-300 uppercase tracking-wide mb-1.5">
@@ -215,6 +377,7 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
             </div>
           </div>
 
+          {/* Campus Location */}
           <div>
             <label className="block text-xs font-bold text-gray-700 dark:text-zinc-300 uppercase tracking-wide mb-1.5">
               Pickup Spot / Residence Hall
@@ -231,19 +394,7 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-gray-700 dark:text-zinc-300 uppercase tracking-wide mb-1.5">
-              Photo URL (Optional, defaults to verified campus placeholder)
-            </label>
-            <input
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://images.unsplash.com/..."
-              className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700 rounded-xl focus:border-blue-500 outline-none"
-            />
-          </div>
-
+          {/* Description */}
           <div>
             <label className="block text-xs font-bold text-gray-700 dark:text-zinc-300 uppercase tracking-wide mb-1.5">
               Description & Notes
@@ -257,6 +408,7 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
             />
           </div>
 
+          {/* Tags */}
           <div>
             <label className="block text-xs font-bold text-gray-700 dark:text-zinc-300 uppercase tracking-wide mb-1.5">
               Tags (comma separated)
@@ -270,6 +422,7 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
             />
           </div>
 
+          {/* Submit */}
           <div className="pt-4 border-t border-gray-200 dark:border-zinc-800 flex justify-end gap-3">
             <button
               type="button"

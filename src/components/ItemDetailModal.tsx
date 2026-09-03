@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { X, MapPin, CheckCircle, Repeat, MessageSquare, Send, ShieldCheck } from 'lucide-react';
 import { ListingItem } from '../types';
 import { useMarketplace } from '../context/MarketplaceContext';
+import { formatRupee } from '../lib/formatCurrency';
 
 interface ItemDetailModalProps {
   item: ListingItem;
@@ -31,7 +32,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
     e.preventDefault();
     sendMessage(
       item.id,
-      `I would like to make an offer of \$${offerValue} for this item. Can meet at ${item.campusLocation}!`,
+      `I would like to make an offer of ${formatRupee(offerValue)} for this item. Can meet at ${item.campusLocation}!`,
       true,
       offerValue
     );
@@ -101,7 +102,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
               </h2>
               <div className="flex items-baseline gap-3 mt-2">
                 {item.price > 0 ? (
-                  <span className="text-2xl font-black text-gray-900 dark:text-white">${item.price}</span>
+                  <span className="text-2xl font-black text-gray-900 dark:text-white">{formatRupee(item.price)}</span>
                 ) : (
                   <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
                     {item.exchangeType === 'Giveaway' ? 'Free Giveaway' : 'Trade Available'}
@@ -208,7 +209,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
                         >
                           {msg.isOffer && (
                             <div className="mb-1 pb-1 border-b border-white/20 font-bold flex items-center justify-between gap-2">
-                              <span>Offer: $${msg.offerAmount}</span>
+                              <span>Offer: {formatRupee(msg.offerAmount || 0)}</span>
                               <span className="uppercase text-[10px] px-1.5 py-0.2 rounded bg-white/20">
                                 {msg.status || 'Pending'}
                               </span>
@@ -230,12 +231,12 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
                     <button type="button" onClick={() => setShowOfferForm(false)} className="text-xs text-gray-400 hover:text-gray-600">Cancel</button>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-gray-700 dark:text-zinc-300">$</span>
+                    <span className="text-sm font-bold text-gray-700 dark:text-zinc-300">₹</span>
                     <input
                       type="number"
                       value={offerValue}
                       onChange={(e) => setOfferValue(Number(e.target.value))}
-                      className="w-24 px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 rounded-xl border border-gray-300 dark:border-zinc-700 focus:outline-blue-500"
+                      className="w-28 px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 rounded-xl border border-gray-300 dark:border-zinc-700 focus:outline-blue-500"
                     />
                     <button
                       type="submit"
@@ -252,7 +253,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
                     onClick={() => setShowOfferForm(true)}
                     className="px-3 py-1.5 text-xs font-semibold rounded-full border border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
                   >
-                    Make Offer ($)
+                    Make Offer (₹)
                   </button>
                 </div>
               )}

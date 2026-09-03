@@ -24,6 +24,8 @@ interface MarketplaceContextType {
   setSelectedExchangeType: (type: string) => void;
   savedOnly: boolean;
   setSavedOnly: (saved: boolean) => void;
+  qrModalOpen: boolean;
+  setQrModalOpen: (open: boolean) => void;
 }
 
 const MarketplaceContext = createContext<MarketplaceContextType | undefined>(undefined);
@@ -33,6 +35,7 @@ export const MarketplaceProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [savedItemIds, setSavedItemIds] = useState<string[]>(['item-1', 'item-4']);
   const [activeItem, setActiveItem] = useState<ListingItem | null>(null);
   const [chatOpen, setChatOpen] = useState<boolean>(false);
+  const [qrModalOpen, setQrModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedExchangeType, setSelectedExchangeType] = useState<string>('all');
@@ -49,10 +52,10 @@ export const MarketplaceProvider: React.FC<{ children: React.ReactNode }> = ({ c
       {
         id: 'msg-2',
         senderId: 'me',
-        text: 'Hey! I am at North Quad. Could you do $30 cash or trade for Wade Orgo?',
+        text: 'Hey! I am at North Quad. Could you do ₹1,500 cash or trade for Wade Orgo?',
         timestamp: '11:45 AM',
         isOffer: true,
-        offerAmount: 30,
+        offerAmount: 1500,
         status: 'pending'
       }
     ]
@@ -131,7 +134,9 @@ export const MarketplaceProvider: React.FC<{ children: React.ReactNode }> = ({ c
         selectedExchangeType,
         setSelectedExchangeType,
         savedOnly,
-        setSavedOnly
+        setSavedOnly,
+        qrModalOpen,
+        setQrModalOpen
       }}
     >
       {children}

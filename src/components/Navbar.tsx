@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, PlusCircle, Bookmark, Sparkles } from 'lucide-react';
+import { Search, PlusCircle, Bookmark, Sparkles, QrCode } from 'lucide-react';
 import { useMarketplace } from '../context/MarketplaceContext';
 
 interface NavbarProps {
@@ -9,12 +9,13 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
-  const { searchTerm, setSearchTerm, savedItemIds, savedOnly, setSavedOnly } = useMarketplace();
+  const { searchTerm, setSearchTerm, savedItemIds, savedOnly, setSavedOnly, setQrModalOpen } = useMarketplace();
 
   return (
     <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/80 dark:bg-[#121316]/80 border-b border-gray-200/80 dark:border-zinc-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         
+        {/* Logo / Brand */}
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-sm shadow-blue-500/20">
             <Sparkles className="w-5 h-5 text-white/90" />
@@ -29,6 +30,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
           </div>
         </div>
 
+        {/* Global Search Bar */}
         <div className="flex-1 max-w-xl mx-auto">
           <div className="relative flex items-center">
             <Search className="absolute left-3.5 w-4 h-4 text-gray-400 dark:text-zinc-500 pointer-events-none" />
@@ -42,7 +44,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        {/* Actions */}
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          {/* QR Code trigger button for mobile scan */}
+          <button
+            onClick={() => setQrModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-zinc-800 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 transition-colors border border-gray-200/60 dark:border-zinc-700"
+            title="Scan QR to open on mobile"
+          >
+            <QrCode className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <span className="hidden md:inline">Mobile QR</span>
+          </button>
+
           <button
             onClick={() => setSavedOnly(!savedOnly)}
             className={`relative p-2 rounded-full transition-colors ${
@@ -68,7 +81,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
             <span className="hidden sm:inline">Post Item</span>
           </button>
 
-          <div className="flex items-center gap-2 pl-2 border-l border-gray-200 dark:border-zinc-800">
+          <div className="flex items-center gap-2 pl-1 sm:pl-2 border-l border-gray-200 dark:border-zinc-800">
             <img
               src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200"
               alt="Alex"

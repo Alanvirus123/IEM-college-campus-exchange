@@ -4,6 +4,7 @@ import React from 'react';
 import { Bookmark, MapPin, Repeat, CheckCircle, Gift } from 'lucide-react';
 import { ListingItem } from '../types';
 import { useMarketplace } from '../context/MarketplaceContext';
+import { formatRupee } from '../lib/formatCurrency';
 
 interface ItemCardProps {
   item: ListingItem;
@@ -39,7 +40,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
     }
     return (
       <span className="inline-flex items-center font-bold text-gray-900 dark:text-white text-base">
-        ${item.price}
+        {formatRupee(item.price)}
       </span>
     );
   };
