@@ -1,0 +1,44 @@
+export type CategoryType = 'books' | 'electronics' | 'furniture' | 'lab';
+
+export type ItemCondition = 'Brand New' | 'Like New' | 'Good' | 'Fair';
+
+export type ExchangeType = 'Trade' | 'Sell' | 'Giveaway' | 'Borrow';
+
+export interface ListingItem {
+  id: string;
+  title: string;
+  category: CategoryType;
+  price: number;
+  exchangeType: ExchangeType;
+  condition: ItemCondition;
+  description: string;
+  campusLocation: string;
+  department?: string;
+  courseCode?: string;
+  images: string[];
+  seller: {
+    id: string;
+    name: string;
+    avatar: string;
+    major: string;
+    year: string;
+    rating: number;
+    tradesCompleted: number;
+    verifiedStudent: boolean;
+  };
+  postedDate: string;
+  isAvailable: boolean;
+  interestedTradeFor?: string;
+  tags: string[];
+}
+
+export interface ChatMessage {
+  id: string;
+  senderId: string;
+  text: string;
+  timestamp: string;
+  isOffer?: boolean;
+  offerAmount?: number;
+  tradeItemTitle?: string;
+  status?: 'pending' | 'accepted' | 'declined';
+}
