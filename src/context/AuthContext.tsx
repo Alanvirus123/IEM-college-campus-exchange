@@ -12,7 +12,9 @@ interface AuthContextType {
   openAuthModal: (mode?: 'signin' | 'signup') => void;
   profileModalOpen: boolean;
   setProfileModalOpen: (open: boolean) => void;
-  signUp: (data: { name: string; email: string; phone: string; password?: string; major?: string; year?: string }) => Promise<{ success: boolean; error?: string }>;
+  sendOtp: (phone: string) => Promise<{ success: boolean; error?: string; simulatedOtp?: string; message?: string }>;
+  verifyOtp: (phone: string, otp: string) => Promise<{ verified: boolean; error?: string; message?: string }>;
+  signUp: (data: { name: string; email: string; phone: string; password?: string; major?: string; year?: string; phoneVerified?: boolean }) => Promise<{ success: boolean; error?: string }>;
   signIn: (data: { emailOrPhone: string; password?: string }) => Promise<{ success: boolean; error?: string }>;
   signOut: () => void;
   updateProfile: (data: Partial<User>) => void;
@@ -42,12 +44,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (savedUser) {
         setCurrentUser(JSON.parse(savedUser));
       } else {
-        // Provide a default logged-in campus student so app is immediately usable
+        // Preload verified campus student
         const defaultUser: User = {
           id: 'user-me-1',
           name: 'Alex Vance',
           email: 'alex.vance@campus.edu',
           phone: '+91 98765 43210',
+          phoneVerified: true,
           major: 'Computer Science & AI',
           year: 'Junior (3rd Year)',
           avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200',
@@ -67,12 +70,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAuthModalOpen(true);
   };
 
-  const signUp = async (data: { name: string; email: string; phone: string; password?: string; major?: string; year?: string }) => {
+  const sendOtp = async (phone: string) => {
+    try {
+      const res = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      });
+      const data = await res.json();
+      return data;
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Could not connect to SMS service.' };
+    }
+  };
+
+  const verifyOtp = async (phone: string, otp: string) => {
+    try {
+      const res = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, otp })
+      });
+      const data = await res.json();
+      return data;
+    } catch (err: any) {
+      return { verified: false, error: err.message || 'Could not connect to verification service.' };
+    }
+  };
+
+  const signUp = async (data: { name: string; email: string; phone: string; password?: string; major?: string; year?: string; phoneVerified?: boolean }) => {
     if (!data.name.trim() || !data.email.trim() || !data.phone.trim()) {
       return { success: false, error: 'Name, email, and phone number are required.' };
     }
 
-    // Format phone with +91 if not present
     let formattedPhone = data.phone.trim();
     if (!formattedPhone.startsWith('+')) {
       formattedPhone = formattedPhone.startsWith('91') ? '+' + formattedPhone : '+91 ' + formattedPhone;
@@ -84,6 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       name: data.name.trim(),
       email: data.email.trim().toLowerCase(),
       phone: formattedPhone,
+      phoneVerified: data.phoneVerified ?? true,
       major: data.major?.trim() || 'General Studies',
       year: data.year?.trim() || 'Undergraduate',
       avatarColor: randomColor,
@@ -91,13 +122,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     try {
-      // Save to registered users list
       const existingUsersRaw = localStorage.getItem('uniloop_registered_users');
       const registered = existingUsersRaw ? JSON.parse(existingUsersRaw) : [];
       registered.push(newUser);
       localStorage.setItem('uniloop_registered_users', JSON.stringify(registered));
 
-      // Set as current session
       setCurrentUser(newUser);
       localStorage.setItem('uniloop_current_user', JSON.stringify(newUser));
       setAuthModalOpen(false);
@@ -126,7 +155,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthModalOpen(false);
         return { success: true };
       } else {
-        // For smooth demo experience, allow instant sign-in with quick profile creation
         const randomColor = COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
         const isEmail = q.includes('@');
         const fallbackUser: User = {
@@ -134,6 +162,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name: isEmail ? q.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Campus Student',
           email: isEmail ? q : q + '@campus.edu',
           phone: !isEmail ? (q.startsWith('+') ? q : '+91 ' + q) : '+91 98765 00000',
+          phoneVerified: true,
           major: 'Campus Exchange Member',
           year: 'Student',
           avatarColor: randomColor,
@@ -177,6 +206,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         openAuthModal,
         profileModalOpen,
         setProfileModalOpen,
+        sendOtp,
+        verifyOtp,
         signUp,
         signIn,
         signOut,

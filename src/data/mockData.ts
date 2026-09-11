@@ -27,6 +27,7 @@ export const INITIAL_ITEMS: ListingItem[] = [
       verifiedStudent: true,
       email: 'maya.lin@campus.edu',
       phone: '+91 98765 43210',
+      phoneVerified: true,
       alternatePhone: '+91 98111 22334'
     },
     postedDate: '2 hours ago',
@@ -59,7 +60,8 @@ export const INITIAL_ITEMS: ListingItem[] = [
       tradesCompleted: 22,
       verifiedStudent: true,
       email: 'david.chen@campus.edu',
-      phone: '+91 98450 12345'
+      phone: '+91 98450 12345',
+      phoneVerified: true
     },
     postedDate: 'Yesterday',
     isAvailable: true,
@@ -91,6 +93,7 @@ export const INITIAL_ITEMS: ListingItem[] = [
       verifiedStudent: true,
       email: 'elena.r@campus.edu',
       phone: '+91 97123 98765',
+      phoneVerified: true,
       alternatePhone: '+91 99887 66554'
     },
     postedDate: '3 days ago',
@@ -121,7 +124,8 @@ export const INITIAL_ITEMS: ListingItem[] = [
       tradesCompleted: 7,
       verifiedStudent: true,
       email: 'marcus.v@campus.edu',
-      phone: '+91 98222 33445'
+      phone: '+91 98222 33445',
+      phoneVerified: true
     },
     postedDate: '5 hours ago',
     isAvailable: true,
@@ -151,7 +155,8 @@ export const INITIAL_ITEMS: ListingItem[] = [
       tradesCompleted: 18,
       verifiedStudent: true,
       email: 'aiden.patel@campus.edu',
-      phone: '+91 99100 88221'
+      phone: '+91 99100 88221',
+      phoneVerified: true
     },
     postedDate: '4 days ago',
     isAvailable: true,
@@ -181,7 +186,8 @@ export const INITIAL_ITEMS: ListingItem[] = [
       tradesCompleted: 11,
       verifiedStudent: true,
       email: 'sarah.kim@campus.edu',
-      phone: '+91 96555 44332'
+      phone: '+91 96555 44332',
+      phoneVerified: true
     },
     postedDate: '1 day ago',
     isAvailable: true,
@@ -210,7 +216,8 @@ export const INITIAL_ITEMS: ListingItem[] = [
       tradesCompleted: 6,
       verifiedStudent: true,
       email: 'liam.oc@campus.edu',
-      phone: '+91 97888 11223'
+      phone: '+91 97888 11223',
+      phoneVerified: true
     },
     postedDate: '6 days ago',
     isAvailable: true,
@@ -241,7 +248,8 @@ export const INITIAL_ITEMS: ListingItem[] = [
       tradesCompleted: 14,
       verifiedStudent: true,
       email: 'maya.lin@campus.edu',
-      phone: '+91 98765 43210'
+      phone: '+91 98765 43210',
+      phoneVerified: true
     },
     postedDate: '1 week ago',
     isAvailable: true,

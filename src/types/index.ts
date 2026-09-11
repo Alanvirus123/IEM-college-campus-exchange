@@ -9,6 +9,7 @@ export interface User {
   name: string;
   email: string;
   phone: string;
+  phoneVerified?: boolean;
   major?: string;
   year?: string;
   avatar?: string;
@@ -27,6 +28,7 @@ export interface SellerInfo {
   verifiedStudent: boolean;
   email?: string;
   phone?: string;
+  phoneVerified?: boolean;
   alternatePhone?: string;
 }
 
