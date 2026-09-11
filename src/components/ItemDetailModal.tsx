@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, MapPin, CheckCircle, Repeat, MessageSquare, Send, ShieldCheck } from 'lucide-react';
+import { X, MapPin, CheckCircle, Repeat, MessageSquare, Send, ShieldCheck, Phone, Mail, MessageCircle, Copy, Check, Lock, ExternalLink } from 'lucide-react';
 import { ListingItem } from '../types';
 import { useMarketplace } from '../context/MarketplaceContext';
+import { useAuth } from '../context/AuthContext';
 import { formatRupee } from '../lib/formatCurrency';
 
 interface ItemDetailModalProps {
@@ -13,10 +14,15 @@ interface ItemDetailModalProps {
 
 export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose }) => {
   const { messages, sendMessage, savedItemIds, toggleSaveItem } = useMarketplace();
+  const { currentUser, openAuthModal } = useAuth();
+
   const [activeImgIdx, setActiveImgIdx] = useState(0);
   const [chatInput, setChatInput] = useState('');
   const [offerValue, setOfferValue] = useState<number>(item.price > 0 ? item.price : 0);
   const [showOfferForm, setShowOfferForm] = useState(false);
+  const [copiedPhone, setCopiedPhone] = useState(false);
+  const [copiedAltPhone, setCopiedAltPhone] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
 
   const itemMessages = messages[item.id] || [];
   const isSaved = savedItemIds.includes(item.id);
@@ -39,6 +45,25 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
     setShowOfferForm(false);
   };
 
+  const copyToClipboard = (text: string, type: 'phone' | 'alt' | 'email') => {
+    navigator.clipboard.writeText(text);
+    if (type === 'phone') {
+      setCopiedPhone(true);
+      setTimeout(() => setCopiedPhone(false), 2000);
+    } else if (type === 'alt') {
+      setCopiedAltPhone(true);
+      setTimeout(() => setCopiedAltPhone(false), 2000);
+    } else {
+      setCopiedEmail(true);
+      setTimeout(() => setCopiedEmail(false), 2000);
+    }
+  };
+
+  const getCleanPhone = (phoneStr?: string) => {
+    if (!phoneStr) return '';
+    return phoneStr.replace(/[^0-9]/g, '');
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
       <div 
@@ -52,6 +77,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
           <X className="w-5 h-5" />
         </button>
 
+        {/* Left Side: Images & Verified Badge */}
         <div className="w-full md:w-1/2 bg-gray-50 dark:bg-zinc-950 p-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-gray-200/70 dark:border-zinc-800">
           <div className="space-y-4">
             <div className="relative aspect-4/3 w-full rounded-2xl overflow-hidden bg-gray-200 dark:bg-zinc-900 shadow-inner">
@@ -85,11 +111,12 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
           <div className="mt-4 p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 flex items-center gap-3">
             <ShieldCheck className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
             <div className="text-xs text-blue-900 dark:text-blue-300 leading-tight">
-              <span className="font-semibold">Verified Campus Exchange:</span> Only registered students with institutional emails can negotiate trades.
+              <span className="font-semibold">Verified Student Contact:</span> Directly call, WhatsApp, or email the seller to inspect and pick up items on campus.
             </div>
           </div>
         </div>
 
+        {/* Right Side: Details, Direct Contact Card, Chat & Offers */}
         <div className="w-full md:w-1/2 flex flex-col h-full max-h-[90vh]">
           <div className="p-6 overflow-y-auto flex-1 space-y-5">
             <div>
@@ -114,6 +141,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
               </div>
             </div>
 
+            {/* Seller Bio Card */}
             <div className="p-4 rounded-2xl bg-gray-50 dark:bg-zinc-900/70 border border-gray-200/60 dark:border-zinc-800 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <img
@@ -138,6 +166,152 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
               </div>
             </div>
 
+            {/* Direct Contact Seller Card (Email, Phone, Alternate Phone, WhatsApp) */}
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/60 via-indigo-50/30 to-violet-50/30 dark:from-zinc-900 dark:to-blue-950/20 border border-blue-200/70 dark:border-blue-900/60 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold text-blue-950 dark:text-blue-300 uppercase tracking-wide flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-blue-600" /> Direct Seller Contact
+                </h4>
+                {currentUser && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Verified Contact
+                  </span>
+                )}
+              </div>
+
+              {currentUser ? (
+                <div className="space-y-2 text-xs">
+                  {/* Primary Phone */}
+                  {item.seller.phone && (
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-zinc-800 border border-gray-200/60 dark:border-zinc-700">
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <Phone className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <div>
+                          <div className="text-[10px] text-gray-400 font-semibold uppercase">Primary Phone</div>
+                          <div className="font-bold text-gray-900 dark:text-white truncate">{item.seller.phone}</div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <a
+                          href={`tel:${item.seller.phone}`}
+                          className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 font-semibold text-[11px] flex items-center gap-1"
+                        >
+                          <Phone className="w-3 h-3" />
+                          <span>Call</span>
+                        </a>
+                        <a
+                          href={`https://wa.me/${getCleanPhone(item.seller.phone)}?text=${encodeURIComponent(`Hi ${item.seller.name.split(' ')[0]}, I saw your listing "${item.title}" on UniLoop Campus Exchange!`)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center gap-1 shadow-xs"
+                        >
+                          <MessageCircle className="w-3 h-3" />
+                          <span>WhatsApp</span>
+                        </a>
+                        <button
+                          onClick={() => copyToClipboard(item.seller.phone || '', 'phone')}
+                          className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-700"
+                          title="Copy phone"
+                        >
+                          {copiedPhone ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Alternate Phone (if provided by seller for this item) */}
+                  {item.seller.alternatePhone && (
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-zinc-800 border border-blue-200/80 dark:border-blue-900/60">
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <Phone className="w-4 h-4 text-blue-600 shrink-0" />
+                        <div>
+                          <div className="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase flex items-center gap-1">
+                            <span>Alternate Phone</span>
+                            <span className="text-[9px] px-1 py-0.2 rounded bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300">Item Specific</span>
+                          </div>
+                          <div className="font-bold text-gray-900 dark:text-white truncate">{item.seller.alternatePhone}</div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <a
+                          href={`tel:${item.seller.alternatePhone}`}
+                          className="px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 hover:bg-blue-100 font-semibold text-[11px] flex items-center gap-1"
+                        >
+                          <Phone className="w-3 h-3" />
+                          <span>Call</span>
+                        </a>
+                        <a
+                          href={`https://wa.me/${getCleanPhone(item.seller.alternatePhone)}?text=${encodeURIComponent(`Hi, I saw the listing "${item.title}" on UniLoop Campus Exchange!`)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] flex items-center gap-1 shadow-xs"
+                        >
+                          <MessageCircle className="w-3 h-3" />
+                          <span>WhatsApp</span>
+                        </a>
+                        <button
+                          onClick={() => copyToClipboard(item.seller.alternatePhone || '', 'alt')}
+                          className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-700"
+                          title="Copy alternate phone"
+                        >
+                          {copiedAltPhone ? <Check className="w-3.5 h-3.5 text-blue-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Email */}
+                  {item.seller.email && (
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-zinc-800 border border-gray-200/60 dark:border-zinc-700">
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <Mail className="w-4 h-4 text-blue-600 shrink-0" />
+                        <div>
+                          <div className="text-[10px] text-gray-400 font-semibold uppercase">Email Address</div>
+                          <div className="font-bold text-gray-900 dark:text-white truncate">{item.seller.email}</div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <a
+                          href={`mailto:${item.seller.email}?subject=${encodeURIComponent(`Regarding: ${item.title} on UniLoop`)}`}
+                          className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 text-gray-800 dark:text-zinc-200 font-semibold text-[11px] flex items-center gap-1"
+                        >
+                          <Mail className="w-3 h-3" />
+                          <span>Mail</span>
+                        </a>
+                        <button
+                          onClick={() => copyToClipboard(item.seller.email || '', 'email')}
+                          className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-700"
+                          title="Copy email"
+                        >
+                          {copiedEmail ? <Check className="w-3.5 h-3.5 text-blue-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-white/80 dark:bg-zinc-800/80 border border-blue-200 dark:border-blue-900 text-center space-y-2">
+                  <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-gray-800 dark:text-zinc-200">
+                    <Lock className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Sign in to reveal seller's phone & email</span>
+                  </div>
+                  <p className="text-[11px] text-gray-500 dark:text-zinc-400">
+                    Contact details are protected for registered campus students.
+                  </p>
+                  <button
+                    onClick={() => openAuthModal('signin')}
+                    className="px-4 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition-colors inline-block"
+                  >
+                    Sign In to Contact Seller
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Meetup Point */}
             <div className="space-y-2">
               <h4 className="text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wide">
                 Campus Meetup Point
@@ -179,10 +353,11 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
               ))}
             </div>
 
+            {/* In-App Negotiation & Messages */}
             <div className="border-t border-gray-200 dark:border-zinc-800 pt-4 space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wide flex items-center gap-1.5">
-                  <MessageSquare className="w-4 h-4 text-blue-500" /> Live Campus Chat & Offers
+                  <MessageSquare className="w-4 h-4 text-blue-500" /> Campus Chat & Counter-Offers
                 </h4>
                 <span className="text-[11px] text-gray-400">Direct student message</span>
               </div>
@@ -292,11 +467,16 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
 
             <button
               onClick={() => {
-                setShowOfferForm(true);
+                if (item.seller.phone) {
+                  window.open(`https://wa.me/${getCleanPhone(item.seller.phone)}`, '_blank');
+                } else {
+                  setShowOfferForm(true);
+                }
               }}
-              className="px-6 py-2 rounded-full text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 active:scale-95 transition-all"
+              className="px-6 py-2 rounded-full text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 active:scale-95 transition-all flex items-center gap-1.5"
             >
-              Exchange / Buy Now
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span>Contact Seller</span>
             </button>
           </div>
 

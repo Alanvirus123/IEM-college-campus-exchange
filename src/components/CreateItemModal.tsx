@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { X, Sparkles, BookOpen, Laptop, Armchair, FlaskConical, MapPin, Camera, Image as ImageIcon, Trash2, Plus, Link as LinkIcon } from 'lucide-react';
+import { X, Sparkles, BookOpen, Laptop, Armchair, FlaskConical, MapPin, Camera, Image as ImageIcon, Trash2, Plus, Link as LinkIcon, Phone, Mail, User as UserIcon, Lock } from 'lucide-react';
 import { CategoryType, ItemCondition, ExchangeType } from '../types';
 import { useMarketplace } from '../context/MarketplaceContext';
+import { useAuth } from '../context/AuthContext';
 
 interface CreateItemModalProps {
   onClose: () => void;
@@ -11,6 +12,7 @@ interface CreateItemModalProps {
 
 export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => {
   const { addItem } = useMarketplace();
+  const { currentUser, openAuthModal } = useAuth();
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<CategoryType>('books');
@@ -24,7 +26,12 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
   const [interestedTradeFor, setInterestedTradeFor] = useState('');
   const [tagsInput, setTagsInput] = useState('');
 
-  // Image upload states: camera, gallery, or URL
+  // Primary & Alternate phone numbers
+  const [primaryPhone, setPrimaryPhone] = useState(currentUser?.phone || '');
+  const [alternatePhone, setAlternatePhone] = useState('');
+  const [contactEmail, setContactEmail] = useState(currentUser?.email || '');
+
+  // Image upload states
   const [images, setImages] = useState<string[]>([]);
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [customUrl, setCustomUrl] = useState('');
@@ -39,7 +46,6 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
     lab: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=1000',
   };
 
-  // Handle file uploads (both camera and gallery)
   const handleFiles = (fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return;
 
@@ -78,6 +84,9 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
       .map(t => t.trim())
       .filter(t => t.length > 0);
 
+    const sellerName = currentUser ? currentUser.name : 'Alex Vance (You)';
+    const sellerAvatar = currentUser?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200';
+
     addItem({
       title,
       category,
@@ -90,7 +99,20 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
       courseCode: courseCode || undefined,
       interestedTradeFor: exchangeType === 'Trade' ? interestedTradeFor : undefined,
       images: finalImages,
-      tags: tags.length > 0 ? tags : [category, condition]
+      tags: tags.length > 0 ? tags : [category, condition],
+      seller: {
+        id: currentUser ? currentUser.id : 'me',
+        name: sellerName,
+        avatar: sellerAvatar,
+        major: currentUser?.major || 'Campus Student',
+        year: currentUser?.year || 'Junior (3rd Year)',
+        rating: 5.0,
+        tradesCompleted: 4,
+        verifiedStudent: true,
+        email: contactEmail || currentUser?.email || 'alex.vance@campus.edu',
+        phone: primaryPhone || currentUser?.phone || '+91 98765 43210',
+        alternatePhone: alternatePhone.trim() || undefined
+      }
     });
 
     onClose();
@@ -124,6 +146,22 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
           </button>
         </div>
 
+        {!currentUser && (
+          <div className="m-6 p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-xs text-blue-900 dark:text-blue-300">
+              <Lock className="w-4 h-4 text-blue-600 shrink-0" />
+              <span>Sign in with your campus phone & email so buyers can easily contact you.</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => openAuthModal('signin')}
+              className="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 whitespace-nowrap"
+            >
+              Sign In Now
+            </button>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-5 flex-1">
           
           {/* Title */}
@@ -141,6 +179,69 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
             />
           </div>
 
+          {/* Contact Details & Alternate Phone */}
+          <div className="p-4 rounded-2xl bg-gray-50 dark:bg-zinc-900/60 border border-gray-200/80 dark:border-zinc-800 space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-gray-800 dark:text-zinc-200 uppercase tracking-wide flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5 text-blue-600" /> Seller Contact Information
+              </label>
+              <span className="text-[11px] text-gray-400">Buyers will use this to contact you</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-600 dark:text-zinc-400 mb-1">
+                  Primary Mobile / WhatsApp Number *
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-2.5 w-3.5 h-3.5 text-gray-400" />
+                  <input
+                    type="tel"
+                    required
+                    value={primaryPhone}
+                    onChange={(e) => setPrimaryPhone(e.target.value)}
+                    placeholder="+91 98765 43210"
+                    className="w-full pl-9 pr-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl focus:border-blue-500 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-600 dark:text-zinc-400 mb-1">
+                  Alternate Phone Number (Optional)
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-500" />
+                  <input
+                    type="tel"
+                    value={alternatePhone}
+                    onChange={(e) => setAlternatePhone(e.target.value)}
+                    placeholder="Friend / Hostel / Alternate number"
+                    className="w-full pl-9 pr-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl focus:border-blue-500 outline-none"
+                  />
+                </div>
+                <span className="text-[10px] text-gray-400 mt-0.5 block">Useful if someone else handles pickup or your phone is off.</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-gray-600 dark:text-zinc-400 mb-1">
+                Contact Email Address *
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-2.5 w-3.5 h-3.5 text-gray-400" />
+                <input
+                  type="email"
+                  required
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  placeholder="student@campus.edu"
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl focus:border-blue-500 outline-none"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Photos Upload: Camera & Gallery */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
@@ -151,7 +252,6 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
             </div>
 
             {/* Hidden file inputs */}
-            {/* Camera input with capture="environment" for mobile camera trigger */}
             <input
               type="file"
               accept="image/*"
@@ -160,7 +260,6 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
               className="hidden"
               onChange={(e) => handleFiles(e.target.files)}
             />
-            {/* Gallery input allowing multi-selection */}
             <input
               type="file"
               accept="image/*"
@@ -292,7 +391,7 @@ export const CreateItemModal: React.FC<CreateItemModalProps> = ({ onClose }) => 
             </div>
           </div>
 
-          {/* Exchange Type & Price (in ₹ INR) */}
+          {/* Exchange Type & Price */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-zinc-300 uppercase tracking-wide mb-1.5">

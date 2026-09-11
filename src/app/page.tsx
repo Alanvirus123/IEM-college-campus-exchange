@@ -1,14 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sparkles, ArrowRight, ShieldCheck, Leaf, PackageSearch, QrCode, Smartphone } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldCheck, Leaf, PackageSearch, QrCode, Smartphone, Phone, Mail } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { CategoryBar } from '@/components/CategoryBar';
 import { ItemCard } from '@/components/ItemCard';
 import { ItemDetailModal } from '@/components/ItemDetailModal';
 import { CreateItemModal } from '@/components/CreateItemModal';
 import { QRCodeModal } from '@/components/QRCodeModal';
+import { AuthModal } from '@/components/AuthModal';
+import { UserProfileModal } from '@/components/UserProfileModal';
 import { useMarketplace } from '@/context/MarketplaceContext';
+import { useAuth } from '@/context/AuthContext';
 import { QRCodeSVG } from 'qrcode.react';
 
 export default function Home() {
@@ -25,6 +28,7 @@ export default function Home() {
     setQrModalOpen
   } = useMarketplace();
 
+  const { openAuthModal, currentUser } = useAuth();
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const filteredItems = items.filter((item) => {
@@ -57,18 +61,18 @@ export default function Home() {
             <div className="max-w-2xl text-center md:text-left space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/60 shadow-xs">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Peer-to-Peer Student Circular Economy</span>
+                <span>Verified Peer-to-Peer Student Circular Economy</span>
               </div>
 
               <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-gray-900 dark:text-white leading-[1.15]">
                 Exchange Campus Gear. <br />
                 <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-500 bg-clip-text text-transparent">
-                  Don't Buy Brand New.
+                  Direct Student Contact & Trust.
                 </span>
               </h1>
 
               <p className="text-sm sm:text-base text-gray-600 dark:text-zinc-400 leading-relaxed">
-                Connect with students across dorms & departments to buy, trade, or giveaway textbooks, lab gear, monitors, and furniture. Save up to 80% on college essentials.
+                Connect with verified students across dorms & departments. Call, WhatsApp, or trade textbooks, lab gear, monitors, and furniture with zero middleman fees.
               </p>
 
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
@@ -76,7 +80,7 @@ export default function Home() {
                   onClick={() => setCreateModalOpen(true)}
                   className="px-6 py-3 rounded-full text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/25 active:scale-95 transition-all flex items-center gap-2"
                 >
-                  <span>Post Listing for Free</span>
+                  <span>Post Listing with Phone</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
@@ -91,12 +95,12 @@ export default function Home() {
 
                 <div className="w-full flex items-center justify-center md:justify-start gap-4 text-xs font-medium text-gray-500 dark:text-zinc-400 pt-1">
                   <div className="flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                    <span>Campus Verified</span>
+                    <Phone className="w-4 h-4 text-emerald-500" />
+                    <span>WhatsApp / Direct Call</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Leaf className="w-4 h-4 text-emerald-500" />
-                    <span>Zero Waste</span>
+                    <Mail className="w-4 h-4 text-blue-500" />
+                    <span>Campus Email</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="font-bold text-blue-500">₹</span>
@@ -118,7 +122,7 @@ export default function Home() {
               </div>
               <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900/80 border border-gray-200/80 dark:border-zinc-800 shadow-xs">
                 <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">100%</div>
-                <div className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">On-campus meetups</div>
+                <div className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Direct phone / chat</div>
               </div>
               {/* QR Mini Trigger Card */}
               <div 
@@ -194,11 +198,14 @@ export default function Home() {
         />
       )}
 
+      <AuthModal />
+      <UserProfileModal />
+
       <footer className="border-t border-gray-200/80 dark:border-zinc-800 bg-white dark:bg-[#121316] py-8 mt-12 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-zinc-400">
           <div className="flex items-center gap-2">
             <span className="font-bold text-gray-900 dark:text-white">UniLoop Campus Exchange</span>
-            <span>• Built for university sustainability and affordable education</span>
+            <span>• Direct buyer-seller student marketplace</span>
           </div>
           <div className="flex items-center gap-3">
             <button

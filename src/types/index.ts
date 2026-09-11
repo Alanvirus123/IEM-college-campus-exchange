@@ -4,6 +4,32 @@ export type ItemCondition = 'Brand New' | 'Like New' | 'Good' | 'Fair';
 
 export type ExchangeType = 'Trade' | 'Sell' | 'Giveaway' | 'Borrow';
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  major?: string;
+  year?: string;
+  avatar?: string;
+  avatarColor?: string;
+  createdAt: string;
+}
+
+export interface SellerInfo {
+  id: string;
+  name: string;
+  avatar: string;
+  major: string;
+  year: string;
+  rating: number;
+  tradesCompleted: number;
+  verifiedStudent: boolean;
+  email?: string;
+  phone?: string;
+  alternatePhone?: string;
+}
+
 export interface ListingItem {
   id: string;
   title: string;
@@ -16,16 +42,7 @@ export interface ListingItem {
   department?: string;
   courseCode?: string;
   images: string[];
-  seller: {
-    id: string;
-    name: string;
-    avatar: string;
-    major: string;
-    year: string;
-    rating: number;
-    tradesCompleted: number;
-    verifiedStudent: boolean;
-  };
+  seller: SellerInfo;
   postedDate: string;
   isAvailable: boolean;
   interestedTradeFor?: string;

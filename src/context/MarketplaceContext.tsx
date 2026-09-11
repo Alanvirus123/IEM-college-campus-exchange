@@ -8,7 +8,7 @@ interface MarketplaceContextType {
   items: ListingItem[];
   savedItemIds: string[];
   toggleSaveItem: (id: string) => void;
-  addItem: (item: Omit<ListingItem, 'id' | 'postedDate' | 'isAvailable' | 'seller'>) => void;
+  addItem: (item: Omit<ListingItem, 'id' | 'postedDate' | 'isAvailable'>) => void;
   activeItem: ListingItem | null;
   setActiveItem: (item: ListingItem | null) => void;
   chatOpen: boolean;
@@ -67,22 +67,12 @@ export const MarketplaceProvider: React.FC<{ children: React.ReactNode }> = ({ c
     );
   };
 
-  const addItem = (newItemData: Omit<ListingItem, 'id' | 'postedDate' | 'isAvailable' | 'seller'>) => {
+  const addItem = (newItemData: Omit<ListingItem, 'id' | 'postedDate' | 'isAvailable'>) => {
     const newItem: ListingItem = {
       ...newItemData,
       id: 'item-' + (items.length + 1) + '-' + Date.now(),
       postedDate: 'Just now',
-      isAvailable: true,
-      seller: {
-        id: 'me',
-        name: 'Alex Vance (You)',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200',
-        major: 'Engineering & Computing',
-        year: 'Junior (3rd Year)',
-        rating: 5.0,
-        tradesCompleted: 4,
-        verifiedStudent: true
-      }
+      isAvailable: true
     };
     setItems(prev => [newItem, ...prev]);
   };

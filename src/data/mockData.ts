@@ -24,7 +24,10 @@ export const INITIAL_ITEMS: ListingItem[] = [
       year: 'Junior (3rd Year)',
       rating: 4.9,
       tradesCompleted: 14,
-      verifiedStudent: true
+      verifiedStudent: true,
+      email: 'maya.lin@campus.edu',
+      phone: '+91 98765 43210',
+      alternatePhone: '+91 98111 22334'
     },
     postedDate: '2 hours ago',
     isAvailable: true,
@@ -54,7 +57,9 @@ export const INITIAL_ITEMS: ListingItem[] = [
       year: 'Senior (4th Year)',
       rating: 5.0,
       tradesCompleted: 22,
-      verifiedStudent: true
+      verifiedStudent: true,
+      email: 'david.chen@campus.edu',
+      phone: '+91 98450 12345'
     },
     postedDate: 'Yesterday',
     isAvailable: true,
@@ -83,7 +88,10 @@ export const INITIAL_ITEMS: ListingItem[] = [
       year: 'Grad Student',
       rating: 4.8,
       tradesCompleted: 9,
-      verifiedStudent: true
+      verifiedStudent: true,
+      email: 'elena.r@campus.edu',
+      phone: '+91 97123 98765',
+      alternatePhone: '+91 99887 66554'
     },
     postedDate: '3 days ago',
     isAvailable: true,
@@ -111,7 +119,9 @@ export const INITIAL_ITEMS: ListingItem[] = [
       year: 'Senior (4th Year)',
       rating: 4.7,
       tradesCompleted: 7,
-      verifiedStudent: true
+      verifiedStudent: true,
+      email: 'marcus.v@campus.edu',
+      phone: '+91 98222 33445'
     },
     postedDate: '5 hours ago',
     isAvailable: true,
@@ -139,7 +149,9 @@ export const INITIAL_ITEMS: ListingItem[] = [
       year: 'Junior (3rd Year)',
       rating: 5.0,
       tradesCompleted: 18,
-      verifiedStudent: true
+      verifiedStudent: true,
+      email: 'aiden.patel@campus.edu',
+      phone: '+91 99100 88221'
     },
     postedDate: '4 days ago',
     isAvailable: true,
@@ -167,7 +179,9 @@ export const INITIAL_ITEMS: ListingItem[] = [
       year: 'Sophomore (2nd Year)',
       rating: 4.9,
       tradesCompleted: 11,
-      verifiedStudent: true
+      verifiedStudent: true,
+      email: 'sarah.kim@campus.edu',
+      phone: '+91 96555 44332'
     },
     postedDate: '1 day ago',
     isAvailable: true,
@@ -194,7 +208,9 @@ export const INITIAL_ITEMS: ListingItem[] = [
       year: 'Senior (4th Year)',
       rating: 4.6,
       tradesCompleted: 6,
-      verifiedStudent: true
+      verifiedStudent: true,
+      email: 'liam.oc@campus.edu',
+      phone: '+91 97888 11223'
     },
     postedDate: '6 days ago',
     isAvailable: true,
@@ -223,7 +239,9 @@ export const INITIAL_ITEMS: ListingItem[] = [
       year: 'Junior (3rd Year)',
       rating: 4.9,
       tradesCompleted: 14,
-      verifiedStudent: true
+      verifiedStudent: true,
+      email: 'maya.lin@campus.edu',
+      phone: '+91 98765 43210'
     },
     postedDate: '1 week ago',
     isAvailable: true,

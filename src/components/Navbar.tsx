@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Search, PlusCircle, Bookmark, Sparkles, QrCode } from 'lucide-react';
+import { Search, PlusCircle, Bookmark, Sparkles, QrCode, LogIn, User as UserIcon } from 'lucide-react';
 import { useMarketplace } from '../context/MarketplaceContext';
+import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
   onOpenCreateModal: () => void;
@@ -10,6 +11,11 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
   const { searchTerm, setSearchTerm, savedItemIds, savedOnly, setSavedOnly, setQrModalOpen } = useMarketplace();
+  const { currentUser, openAuthModal, setProfileModalOpen } = useAuth();
+
+  const userInitials = currentUser?.name
+    ? currentUser.name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2)
+    : 'U';
 
   return (
     <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/80 dark:bg-[#121316]/80 border-b border-gray-200/80 dark:border-zinc-800 transition-colors">
@@ -56,6 +62,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
             <span className="hidden md:inline">Mobile QR</span>
           </button>
 
+          {/* Saved Items */}
           <button
             onClick={() => setSavedOnly(!savedOnly)}
             className={`relative p-2 rounded-full transition-colors ${
@@ -73,6 +80,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
             )}
           </button>
 
+          {/* Post Item CTA */}
           <button
             onClick={onOpenCreateModal}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-500/25 active:scale-95 transition-all"
@@ -81,12 +89,35 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
             <span className="hidden sm:inline">Post Item</span>
           </button>
 
+          {/* Auth: Sign In or User Profile */}
           <div className="flex items-center gap-2 pl-1 sm:pl-2 border-l border-gray-200 dark:border-zinc-800">
-            <img
-              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200"
-              alt="Alex"
-              className="w-8 h-8 rounded-full border border-blue-500/30 object-cover"
-            />
+            {currentUser ? (
+              <button
+                onClick={() => setProfileModalOpen(true)}
+                className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-blue-500/40 transition-all"
+                title={`Signed in as ${currentUser.name} - View Profile`}
+              >
+                {currentUser.avatar ? (
+                  <img
+                    src={currentUser.avatar}
+                    alt={currentUser.name}
+                    className="w-8 h-8 rounded-full border border-blue-500/30 object-cover"
+                  />
+                ) : (
+                  <div className={`w-8 h-8 rounded-full bg-gradient-to-tr ${currentUser.avatarColor || 'from-blue-600 to-indigo-600'} text-white text-xs font-bold flex items-center justify-center shadow-xs`}>
+                    {userInitials}
+                  </div>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={() => openAuthModal('signin')}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition-colors border border-blue-200 dark:border-blue-900"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Sign In</span>
+              </button>
+            )}
           </div>
         </div>
 
